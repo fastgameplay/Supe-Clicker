@@ -1,5 +1,6 @@
 namespace SupeClicker.UI
 {
+    using System.Collections.Generic;
     using TMPro;
     using Unity.VisualScripting;
     using UnityEngine;
@@ -24,9 +25,11 @@ namespace SupeClicker.UI
                 }
             }
         }
-        
         private int _baseValue = 100;
         private int _currentValue;
+
+        // Cache for formatted strings
+        private Dictionary<int, string> _formattedStringsCache = new Dictionary<int, string>();
 
         private void HandleFillChange(float value)
         {
@@ -36,13 +39,24 @@ namespace SupeClicker.UI
         }
         private void UpdateText()
         {
-            //TODO: Cache formated string by _currentValueAsKey
-            _info.text = _config.GetFormatedString(_baseValue,_currentValue);
+            if (!_formattedStringsCache.TryGetValue(_currentValue, out string formattedString))
+            {
+                // If the string is not in the cache, format it and add it to the cache
+                formattedString = _config.GetFormatedString(_baseValue, _currentValue);
+                
+                _formattedStringsCache[_currentValue] = formattedString;
+            }
+            _info.text = formattedString;
         }
-        private void HandleTextBaseChange(int value){
-            //TODO: Clear formated strings set
+
+        private void HandleTextBaseChange(int value)
+        {
             _baseValue = value;
-            CurrentValue = _currentValue; //update currentValue
+
+            // Clear the cache because the base value has changed
+            _formattedStringsCache.Clear();
+
+            CurrentValue = _currentValue; // Update currentValue
         }
         private void HandleTextValueChange(int value) => CurrentValue = value;
         
